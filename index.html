@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Snake3D</title>
     <style>
-    html, body {
-        padding: 0;
-        margin: 0;
-    }
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+        }
     </style>
 </head>
+
 <body>
     <script src="./three.js"></script>
     <script src="./OrbitControls.js"></script>
@@ -21,53 +24,55 @@
         var renderer = new THREE.WebGLRenderer(), camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 1000), scene = new THREE.Scene();
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
         var clock = new THREE.Clock(), text = document.createElement("div");
+        var input = document.createElement("input");
         controls.enableKeys = false;
 
         var mov = 5;
         var delta = 1 / mov;
         var tetha = 0.0, edgeSize = 20, padding = 0.15;
         var cubeSize = edgeSize + (edgeSize - 1) * padding;
-        var halfCubeSize = cubeSize/2;
+        var halfCubeSize = cubeSize / 2;
 
         var BACKGROUND_COLOR = 0xFFB6C1, BODY_COLOR = 0x388e3c, HEAD_COLOR = 0x004D40, score = 0;
 
-        var lightPos = [new THREE.Vector3(0,50,20), new THREE.Vector3(0,15,-20), new THREE.Vector3(-20,15,20), new THREE.Vector3(20,-15,0)];
+        var lightPos = [new THREE.Vector3(0, 50, 20), new THREE.Vector3(0, 15, -20), new THREE.Vector3(-20, 15, 20), new THREE.Vector3(20, -15, 0)];
 
         var end = false, keysQueue = [];
 
         var snake = [], apple;
-        var cube = new THREE.BoxGeometry( 1, 1, 1 );
-        var gameCube = new THREE.BoxGeometry( cubeSize, cubeSize, cubeSize );
+        var cube = new THREE.BoxGeometry(1, 1, 1);
+        var redcube = new THREE.SphereBufferGeometry(1, 5, 5);
+        var gameCube = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
         var direction = new THREE.Vector3(1, 0, 0);
 
 
-        scene.background = new THREE.Color( BACKGROUND_COLOR );
+        scene.background = new THREE.Color(BACKGROUND_COLOR);
 
         camera.position.z = 30;
         camera.position.y = 30;
 
         cube.center();
 
-        function init(){
+        function init() {
 
             renderer.setSize(WIDTH, HEIGHT);
             document.body.appendChild(renderer.domElement);
 
-            lightPos.forEach(function(v){
+            lightPos.forEach(function (v) {
                 var light = new THREE.PointLight(0xffffff, 1, 100);
                 light.position.set(v.x, v.y, v.z);
                 scene.add(light)
             });
 
-            for(var i = 0; i < 5; i++){
-                var snakeCubeMaterial = new THREE.MeshPhongMaterial( { color: (i == 4) ? HEAD_COLOR : BODY_COLOR} );
-                snake.push(new Cube( new THREE.Vector3((i + i * padding) -halfCubeSize + 0.5 , 0.5 + padding / 2, 0.5 + padding / 2 ), snakeCubeMaterial, scene));
+            for (var i = 0; i < 5; i++) {
+                var snakeCubeMaterial = new THREE.MeshPhongMaterial({ color: (i == 4) ? HEAD_COLOR : BODY_COLOR });
+                snake.push(new Cube(new THREE.Vector3((i + i * padding) - halfCubeSize + 0.5, 0.5 + padding / 2, 0.5 + padding / 2), snakeCubeMaterial, scene));
             }
 
-            var appleCubeMaterial = new THREE.MeshPhongMaterial( { color: 0xc62828} );
-            apple = new Cube(spawnAppleVector(), appleCubeMaterial, scene);
-            var edgesMaterial = new THREE.LineBasicMaterial( { color: 0xffffff } );
-            new Cube(new THREE.Vector3(0,0,0), edgesMaterial, scene, gameCube, true).setPosition(0,0,0);
+            var appleCubeMaterial = new THREE.MeshPhongMaterial({ color: 0xc62828 });
+            apple = new redCube(spawnAppleVector(), appleCubeMaterial, scene);
+            var edgesMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+            new Cube(new THREE.Vector3(0, 0, 0), edgesMaterial, scene, gameCube, true).setPosition(0, 0, 0);
 
             text.style.position = "absolute";
             text.style.width = 200;
@@ -76,21 +81,38 @@
             text.style.top = 20 + "px";
             text.style.left = 20 + "px";
             text.style.fontSize = 50 + "px";
-
+            text.id='text';
+            //input.style.position = "absolute";
+            input.style.width = 400 + "px";
+            input.style.height = 100 + "px";
+            //input.innerHTML = "Score: " + score;
+            //input.appendChild("input")
+            input.type = "range";
+            input.min = "0";
+            input.max = "5";
+            input.value = "0";
+            input.id = "myRanger";
+            input.addEventListener('keydown', function (e) {
+                if (e.keyCode === 38 || e.keyCode === 40 || e.keyCode===37 || e.keyCode===39) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            //<input type="range" min="1" max="100" value="50" class="slider" id="myRange">
             document.body.appendChild(text);
-
+            text.appendChild(input);
             clock.startTime = 0.0;
             render();
         }
 
-        function restart(){
-            while(snake.length > 5) scene.remove(snake.shift().mesh);
+        function restart() {
+            while (snake.length > 5) scene.remove(snake.shift().mesh);
 
-            for(var i = 0; i < snake.length; i++){
-                snake[i].setPosition((i + i * padding) -halfCubeSize + 0.5 , 0.5 + padding / 2, 0.5 + padding / 2 );
+            for (var i = 0; i < snake.length; i++) {
+                snake[i].setPosition((i + i * padding) - halfCubeSize + 0.5, 0.5 + padding / 2, 0.5 + padding / 2);
             }
             end = false;
-            direction = new THREE.Vector3(1,0,0);
+            direction = new THREE.Vector3(1, 0, 0);
             text.innerHTML = "Score: " + 0;
             score = 0;
         }
@@ -98,39 +120,59 @@
         document.onload = init();
 
 
-        function spawnAppleVector(){
-            var x = randInRange(0, edgeSize - 1), y =  randInRange(0, edgeSize - 1), z =  randInRange(0, edgeSize - 1);
-            return new THREE.Vector3(x + x*padding -halfCubeSize + 0.5, y + y * padding -halfCubeSize + 0.5, z + z * padding -halfCubeSize + 0.5);
+        function spawnAppleVector() {
+            var x = randInRange(0, edgeSize - 1), y = randInRange(0, edgeSize - 1), z = randInRange(0, edgeSize - 1);
+            return new THREE.Vector3(x + x * padding - halfCubeSize + 0.5, y + y * padding - halfCubeSize + 0.5, z + z * padding - halfCubeSize + 0.5);
         }
 
-        function Cube(vec, material, scene, geometry, renderWireframe){
+        function Cube(vec, material, scene, geometry, renderWireframe) {
             this.geometry = typeof geometry === 'undefined' ? cube : geometry;
             this.mesh = new THREE.Mesh(this.geometry, material);
 
-            if(typeof renderWireframe === 'undefined' || !renderWireframe){
+            if (typeof renderWireframe === 'undefined' || !renderWireframe) {
                 this.mesh.position.set(vec.x, vec.y, vec.z);
                 scene.add(this.mesh);
             }
             else {
-                var edges = new THREE.EdgesGeometry( this.mesh.geometry );
-                scene.add(new THREE.LineSegments( edges, material ));
+                var edges = new THREE.EdgesGeometry(this.mesh.geometry);
+                scene.add(new THREE.LineSegments(edges, material));
             }
 
-            this.setPosition = function(vec){
+            this.setPosition = function (vec) {
                 this.mesh.position.set(vec.x, vec.y, vec.z);
             };
-        }   
+        }
 
-        function randInRange(a, b){
+        function redCube(vec, material, scene, geometry, renderWireframe) {
+            this.geometry = typeof geometry === 'undefined' ? redcube : geometry;
+            this.mesh = new THREE.Mesh(this.geometry, material);
+
+            if (typeof renderWireframe === 'undefined' || !renderWireframe) {
+                this.mesh.position.set(vec.x, vec.y, vec.z);
+                scene.add(this.mesh);
+            }
+            else {
+                var edges = new THREE.EdgesGeometry(this.mesh.geometry);
+                scene.add(new THREE.LineSegments(edges, material));
+            }
+
+            this.setPosition = function (vec) {
+                this.mesh.position.set(vec.x, vec.y, vec.z);
+            };
+        }
+        function randInRange(a, b) {
             return a + Math.floor((b - a) * Math.random());
         }
 
-        function render(){
+        function render() {
             requestAnimationFrame(render);
-            
-            tetha += clock.getDelta();
-            
-            if(tetha > delta){
+            console.log(document.getElementById("myRanger").value);
+            var c = document.getElementById("myRanger").value;
+
+            tetha += clock.getDelta() + parseInt(c) / 10;
+            console.log("tetha" + tetha);
+
+            if (tetha > delta) {
                 var tail = snake.shift();
                 var head = snake[snake.length - 1];
 
@@ -140,44 +182,44 @@
                 direction = keysQueue.length > 0 ? keysQueue.pop(0) : direction;
                 var newPosition = new THREE.Vector3(head.mesh.position.x + direction.x + Math.sign(direction.x) * padding, head.mesh.position.y + direction.y + Math.sign(direction.y) * padding, head.mesh.position.z + direction.z + Math.sign(direction.z) * padding);
                 tail.setPosition(newPosition);
-                
+
                 snake.push(tail);
                 head = tail;
 
-                for(var i = snake.length - 2; i > -1; i--){
-                    if(head.mesh.position.distanceTo(snake[i].mesh.position) < 1){
+                for (var i = snake.length - 2; i > -1; i--) {
+                    if (head.mesh.position.distanceTo(snake[i].mesh.position) < 1) {
                         end = true;
                         break;
                     }
                 }
 
-                if(end) {
+                if (end) {
                     restart();
                 }
-                if(head.mesh.position.distanceTo(apple.mesh.position) < 1){
+                if (head.mesh.position.distanceTo(apple.mesh.position) < 1) {
                     apple.setPosition(spawnAppleVector());
                     text.innerHTML = "Score: " + (++score);
 
-                    snake.unshift(new Cube( new THREE.Vector3(snake[0].mesh.position.x, snake[0].mesh.position.y, snake[0].mesh.position.z), new THREE.MeshPhongMaterial( { color: 0x388e3c} ), scene));
+                    snake.unshift(new Cube(new THREE.Vector3(snake[0].mesh.position.x, snake[0].mesh.position.y, snake[0].mesh.position.z), new THREE.MeshPhongMaterial({ color: 0x388e3c }), scene));
 
                 }
 
-                if(head.mesh.position.x < -halfCubeSize){
+                if (head.mesh.position.x < -halfCubeSize) {
                     head.mesh.position.x = halfCubeSize - 0.5;
                 }
-                else if(head.mesh.position.x > halfCubeSize){
+                else if (head.mesh.position.x > halfCubeSize) {
                     head.mesh.position.x = -halfCubeSize + 0.5;
                 }
-                else if(head.mesh.position.y < -halfCubeSize){
+                else if (head.mesh.position.y < -halfCubeSize) {
                     head.mesh.position.y = halfCubeSize - 0.5;
                 }
-                else if(head.mesh.position.y > halfCubeSize){
+                else if (head.mesh.position.y > halfCubeSize) {
                     head.mesh.position.y = -halfCubeSize + 0.5;
                 }
-                else if(head.mesh.position.z < -halfCubeSize){
+                else if (head.mesh.position.z < -halfCubeSize) {
                     head.mesh.position.z = halfCubeSize - 0.5;
                 }
-                else if(head.mesh.position.z > halfCubeSize){
+                else if (head.mesh.position.z > halfCubeSize) {
                     head.mesh.position.z = -halfCubeSize + 0.5;
                 }
 
@@ -187,28 +229,29 @@
             renderer.render(scene, camera);
         }
 
-        document.addEventListener("keydown", function(e){
-            switch(e.key){
+        document.addEventListener("keydown", function (e) {
+            switch (e.key) {
                 case 'q':
-                    keysQueue.push(new THREE.Vector3(0,1,0));
-                break;
+                    keysQueue.push(new THREE.Vector3(0, 1, 0));
+                    break;
                 case 'a':
-                    keysQueue.push(new THREE.Vector3(0,-1,0));
-                break;
+                    keysQueue.push(new THREE.Vector3(0, -1, 0));
+                    break;
                 case "ArrowDown":
-                    keysQueue.push(new THREE.Vector3(0,0,1));
-                break;
+                    keysQueue.push(new THREE.Vector3(0, 0, 1));
+                    break;
                 case "ArrowUp":
-                    keysQueue.push(new THREE.Vector3(0,0,-1));
-                break;
+                    keysQueue.push(new THREE.Vector3(0, 0, -1));
+                    break;
                 case "ArrowLeft":
-                    keysQueue.push(new THREE.Vector3(-1,0,0));
-                break;
+                    keysQueue.push(new THREE.Vector3(-1, 0, 0));
+                    break;
                 case "ArrowRight":
-                    keysQueue.push(new THREE.Vector3(1,0,0));
-                break;
+                    keysQueue.push(new THREE.Vector3(1, 0, 0));
+                    break;
             }
         });
     </script>
 </body>
+
 </html>

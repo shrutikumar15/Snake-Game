@@ -4,7 +4,7 @@
 	(factory((global.THREE = {})));
 }(this, (function (exports) { 'use strict';
 
-	
+	// Polyfills
 
 	if ( Number.EPSILON === undefined ) {
 
@@ -14,6 +14,8 @@
 
 	if ( Number.isInteger === undefined ) {
 
+		// Missing in IE
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
 
 		Number.isInteger = function ( value ) {
 
@@ -23,10 +25,11 @@
 
 	}
 
-	
+	//
 
 	if ( Math.sign === undefined ) {
 
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign
 
 		Math.sign = function ( x ) {
 
@@ -38,7 +41,8 @@
 
 	if ( 'name' in Function.prototype === false ) {
 
-		
+		// Missing in IE
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
 
 		Object.defineProperty( Function.prototype, 'name', {
 
@@ -54,7 +58,8 @@
 
 	if ( Object.assign === undefined ) {
 
-		
+		// Missing in IE
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 
 		( function () {
 
@@ -96,7 +101,10 @@
 
 	}
 
-	
+	/**
+	 * https://github.com/mrdoob/eventdispatcher.js/
+	 */
+
 	function EventDispatcher() {}
 
 	Object.assign( EventDispatcher.prototype, {
@@ -317,7 +325,10 @@
 	var BasicDepthPacking = 3200;
 	var RGBADepthPacking = 3201;
 
-	
+	/**
+	 * @author alteredq / http://alteredqualia.com/
+	 * @author mrdoob / http://mrdoob.com/
+	 */
 
 	var _Math = {
 
@@ -326,7 +337,8 @@
 
 		generateUUID: ( function () {
 
-			
+			// http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
+
 			var lut = [];
 
 			for ( var i = 0; i < 256; i ++ ) {
@@ -356,7 +368,8 @@
 
 		},
 
-	
+		// compute euclidian modulo of m % n
+		// https://en.wikipedia.org/wiki/Modulo_operation
 
 		euclideanModulo: function ( n, m ) {
 
@@ -364,7 +377,7 @@
 
 		},
 
-
+		// Linear mapping from range <a1, a2> to range <b1, b2>
 
 		mapLinear: function ( x, a1, a2, b1, b2 ) {
 
@@ -372,14 +385,15 @@
 
 		},
 
-	
+		// https://en.wikipedia.org/wiki/Linear_interpolation
+
 		lerp: function ( x, y, t ) {
 
 			return ( 1 - t ) * x + t * y;
 
 		},
 
-	
+		// http://en.wikipedia.org/wiki/Smoothstep
 
 		smoothstep: function ( x, min, max ) {
 
@@ -403,7 +417,7 @@
 
 		},
 
-	
+		// Random integer from <low, high> interval
 
 		randInt: function ( low, high ) {
 
@@ -411,7 +425,7 @@
 
 		},
 
-	
+		// Random float from <low, high> interval
 
 		randFloat: function ( low, high ) {
 
@@ -419,7 +433,7 @@
 
 		},
 
-	
+		// Random float from <-range/2, range/2> interval
 
 		randFloatSpread: function ( range ) {
 
@@ -459,7 +473,12 @@
 
 	};
 
-
+	/**
+	 * @author mrdoob / http://mrdoob.com/
+	 * @author philogb / http://blog.thejit.org/
+	 * @author egraether / http://egraether.com/
+	 * @author zz85 / http://www.lab4games.net/zz85/blog
+	 */
 
 	function Vector2( x, y ) {
 
@@ -725,6 +744,7 @@
 
 		clamp: function ( min, max ) {
 
+			// assumes min < max, componentwise
 
 			this.x = Math.max( min.x, Math.min( max.x, this.x ) );
 			this.y = Math.max( min.y, Math.min( max.y, this.y ) );
@@ -834,7 +854,7 @@
 
 		angle: function () {
 
-
+			// computes the angle in radians with respect to the positive x-axis
 
 			var angle = Math.atan2( this.y, this.x );
 
@@ -944,6 +964,18 @@
 
 	} );
 
+	/**
+	 * @author mrdoob / http://mrdoob.com/
+	 * @author supereggbert / http://www.paulbrunt.co.uk/
+	 * @author philogb / http://blog.thejit.org/
+	 * @author jordi_ros / http://plattsoft.com
+	 * @author D1plo1d / http://github.com/D1plo1d
+	 * @author alteredq / http://alteredqualia.com/
+	 * @author mikael emtinger / http://gomo.se/
+	 * @author timknip / http://www.floorplanner.com/
+	 * @author bhouston / http://clara.io
+	 * @author WestLangley / http://github.com/WestLangley
+	 */
 
 	function Matrix4() {
 
@@ -1407,7 +1439,8 @@
 			var n31 = te[ 2 ], n32 = te[ 6 ], n33 = te[ 10 ], n34 = te[ 14 ];
 			var n41 = te[ 3 ], n42 = te[ 7 ], n43 = te[ 11 ], n44 = te[ 15 ];
 
-		
+			//TODO: make this more efficient
+			//( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
 
 			return (
 				n41 * (
@@ -1478,7 +1511,7 @@
 
 		getInverse: function ( m, throwOnDegenerate ) {
 
-	
+			// based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
 			var te = this.elements,
 				me = m.elements,
 
@@ -1706,7 +1739,7 @@
 				var sy = vector.set( te[ 4 ], te[ 5 ], te[ 6 ] ).length();
 				var sz = vector.set( te[ 8 ], te[ 9 ], te[ 10 ] ).length();
 
-			
+				// if determine is negative, we need to invert one scale
 				var det = this.determinant();
 				if ( det < 0 ) sx = - sx;
 
@@ -1714,7 +1747,7 @@
 				position.y = te[ 13 ];
 				position.z = te[ 14 ];
 
-			
+				// scale the rotation part
 				matrix.copy( this );
 
 				var invSX = 1 / sx;
@@ -1853,7 +1886,12 @@
 
 	} );
 
-
+	/**
+	 * @author mikael emtinger / http://gomo.se/
+	 * @author alteredq / http://alteredqualia.com/
+	 * @author WestLangley / http://github.com/WestLangley
+	 * @author bhouston / http://clara.io
+	 */
 
 	function Quaternion( x, y, z, w ) {
 
@@ -1874,7 +1912,7 @@
 
 		slerpFlat: function ( dst, dstOffset, src0, srcOffset0, src1, srcOffset1, t ) {
 
-		
+			// fuzz-free, array-based Quaternion SLERP operation
 
 			var x0 = src0[ srcOffset0 + 0 ],
 				y0 = src0[ srcOffset0 + 1 ],
@@ -1913,7 +1951,7 @@
 				z0 = z0 * s + z1 * tDir;
 				w0 = w0 * s + w1 * tDir;
 
-				
+				// Normalize in case we just did a lerp:
 				if ( s === 1 - t ) {
 
 					var f = 1 / Math.sqrt( x0 * x0 + y0 * y0 + z0 * z0 + w0 * w0 );
@@ -2052,7 +2090,9 @@
 
 			var x = euler._x, y = euler._y, z = euler._z, order = euler.order;
 
-		
+			// http://www.mathworks.com/matlabcentral/fileexchange/
+			// 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
+			//	content/SpinCalc.m
 
 			var cos = Math.cos;
 			var sin = Math.sin;
@@ -2117,7 +2157,9 @@
 
 		setFromAxisAngle: function ( axis, angle ) {
 
-		
+			// http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+
+			// assumes axis is normalized
 
 			var halfAngle = angle / 2, s = Math.sin( halfAngle );
 
@@ -2134,7 +2176,9 @@
 
 		setFromRotationMatrix: function ( m ) {
 
-			
+			// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+
+			// assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
 
 			var te = m.elements,
 
@@ -2191,6 +2235,8 @@
 
 		setFromUnitVectors: function () {
 
+			// assumes direction vectors vFrom and vTo are normalized
+
 			var v1 = new Vector3();
 			var r;
 
@@ -2235,6 +2281,7 @@
 
 		inverse: function () {
 
+			// quaternion is assumed to have unit length
 
 			return this.conjugate();
 
@@ -2319,7 +2366,8 @@
 
 		multiplyQuaternions: function ( a, b ) {
 
-			
+			// from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+
 			var qax = a._x, qay = a._y, qaz = a._z, qaw = a._w;
 			var qbx = b._x, qby = b._y, qbz = b._z, qbw = b._w;
 
@@ -2341,7 +2389,7 @@
 
 			var x = this._x, y = this._y, z = this._z, w = this._w;
 
-		
+			// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
 
 			var cosHalfTheta = w * qb._w + x * qb._x + y * qb._y + z * qb._z;
 
@@ -2446,6 +2494,14 @@
 
 	} );
 
+	/**
+	 * @author mrdoob / http://mrdoob.com/
+	 * @author kile / http://kile.stravaganza.org/
+	 * @author philogb / http://blog.thejit.org/
+	 * @author mikael emtinger / http://gomo.se/
+	 * @author egraether / http://egraether.com/
+	 * @author WestLangley / http://github.com/WestLangley
+	 */
 
 	function Vector3( x, y, z ) {
 
@@ -2731,7 +2787,8 @@
 			var x = this.x, y = this.y, z = this.z;
 			var qx = q.x, qy = q.y, qz = q.z, qw = q.w;
 
-			
+			// calculate quat * vector
+
 			var ix = qw * x + qy * z - qz * y;
 			var iy = qw * y + qz * x - qx * z;
 			var iz = qw * z + qx * y - qy * x;
